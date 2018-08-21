@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<server xmlns="urn:jboss:domain:7.0">
+<server xmlns="urn:jboss:domain:5.0">
     <extensions>
         <extension module="org.infinispan.extension"/>
         <extension module="org.infinispan.server.endpoint"/>
@@ -31,9 +31,7 @@
             <security-realm name="ApplicationRealm">
                 <server-identities>
                     <ssl>
-                        <keystore path="application.keystore" relative-to="jboss.server.config.dir"
-                                  keystore-password="password" alias="server" key-password="password"
-                                  generate-self-signed-certificate-host="localhost"/>
+                        <keystore path="application.keystore" relative-to="jboss.server.config.dir" keystore-password="password" alias="server" key-password="password" generate-self-signed-certificate-host="localhost"/>
                     </ssl>
                 </server-identities>
                 <authentication>
@@ -50,8 +48,7 @@
                 <json-formatter name="json-formatter"/>
             </formatters>
             <handlers>
-                <file-handler name="file" formatter="json-formatter" relative-to="jboss.server.data.dir"
-                              path="audit-log.log"/>
+                <file-handler name="file" formatter="json-formatter" relative-to="jboss.server.data.dir" path="audit-log.log"/>
             </handlers>
             <logger log-boot="true" enabled="false">
                 <handlers>
@@ -146,18 +143,15 @@
                 <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n"/>
             </formatter>
             <formatter name="ACCESS-LOG">
-                <pattern-formatter
-                        pattern="%X{address} %X{user} [%d{dd/MMM/yyyy:HH:mm:ss z}] &quot;%X{method} %m %X{protocol}&quot; %X{status} %X{requestSize} %X{responseSize} %X{duration}%n"/>
+                <pattern-formatter pattern="%X{address} %X{user} [%d{dd/MMM/yyyy:HH:mm:ss z}] &quot;%X{method} %m %X{protocol}&quot; %X{status} %X{requestSize} %X{responseSize} %X{duration}%n"/>
             </formatter>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">
-            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000"
-                                runtime-failure-causes-rollback="${jboss.deployment.scanner.rollback.on.failure:false}"/>
+            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000" runtime-failure-causes-rollback="${jboss.deployment.scanner.rollback.on.failure:false}"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true"
-                            use-java-context="true">
+                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
                     <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
                     <driver>h2</driver>
                     <security>
@@ -172,8 +166,7 @@
                 </drivers>
             </datasources>
         </subsystem>
-        <subsystem xmlns="urn:wildfly:elytron:3.0" final-providers="combined-providers"
-                   disallowed-providers="OracleUcrypto">
+        <subsystem xmlns="urn:wildfly:elytron:1.2" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
             <providers>
                 <aggregate-providers name="combined-providers">
                     <providers name="elytron"/>
@@ -186,13 +179,11 @@
                 <file-audit-log name="local-audit" path="audit.log" relative-to="jboss.server.log.dir" format="JSON"/>
             </audit-logging>
             <security-domains>
-                <security-domain name="ApplicationDomain" default-realm="ApplicationRealm"
-                                 permission-mapper="default-permission-mapper">
+                <security-domain name="ApplicationDomain" default-realm="ApplicationRealm" permission-mapper="default-permission-mapper">
                     <realm name="ApplicationRealm" role-decoder="groups-to-roles"/>
                     <realm name="local"/>
                 </security-domain>
-                <security-domain name="ManagementDomain" default-realm="ManagementRealm"
-                                 permission-mapper="default-permission-mapper">
+                <security-domain name="ManagementDomain" default-realm="ManagementRealm" permission-mapper="default-permission-mapper">
                     <realm name="ManagementRealm" role-decoder="groups-to-roles"/>
                     <realm name="local" role-mapper="super-user-mapper"/>
                 </security-domain>
@@ -200,13 +191,11 @@
             <security-realms>
                 <identity-realm name="local" identity="$local"/>
                 <properties-realm name="ApplicationRealm">
-                    <users-properties path="application-users.properties" relative-to="jboss.server.config.dir"
-                                      digest-realm-name="ApplicationRealm"/>
+                    <users-properties path="application-users.properties" relative-to="jboss.server.config.dir" digest-realm-name="ApplicationRealm"/>
                     <groups-properties path="application-roles.properties" relative-to="jboss.server.config.dir"/>
                 </properties-realm>
                 <properties-realm name="ManagementRealm">
-                    <users-properties path="mgmt-users.properties" relative-to="jboss.server.config.dir"
-                                      digest-realm-name="ManagementRealm"/>
+                    <users-properties path="mgmt-users.properties" relative-to="jboss.server.config.dir" digest-realm-name="ManagementRealm"/>
                     <groups-properties path="mgmt-groups.properties" relative-to="jboss.server.config.dir"/>
                 </properties-realm>
             </security-realms>
@@ -214,11 +203,9 @@
                 <simple-permission-mapper name="default-permission-mapper" mapping-mode="first">
                     <permission-mapping>
                         <principal name="anonymous"/>
-                        <permission-set name="default-permissions"/>
                     </permission-mapping>
                     <permission-mapping match-all="true">
-                        <permission-set name="login-permission"/>
-                        <permission-set name="default-permissions"/>
+                        <permission class-name="org.wildfly.security.auth.permission.LoginPermission"/>
                     </permission-mapping>
                 </simple-permission-mapper>
                 <constant-realm-mapper name="local" realm-name="local"/>
@@ -227,15 +214,15 @@
                     <role name="SuperUser"/>
                 </constant-role-mapper>
             </mappers>
-            <permission-sets>
-                <permission-set name="login-permission">
-                    <permission class-name="org.wildfly.security.auth.permission.LoginPermission"/>
-                </permission-set>
-                <permission-set name="default-permissions"/>
-            </permission-sets>
             <http>
-                <http-authentication-factory name="application-http-authentication" security-domain="ApplicationDomain"
-                                             http-server-mechanism-factory="global">
+                <http-authentication-factory name="management-http-authentication" http-server-mechanism-factory="global" security-domain="ManagementDomain">
+                    <mechanism-configuration>
+                        <mechanism mechanism-name="DIGEST">
+                            <mechanism-realm realm-name="ManagementRealm"/>
+                        </mechanism>
+                    </mechanism-configuration>
+                </http-authentication-factory>
+                <http-authentication-factory name="application-http-authentication" http-server-mechanism-factory="global" security-domain="ApplicationDomain">
                     <mechanism-configuration>
                         <mechanism mechanism-name="BASIC">
                             <mechanism-realm realm-name="Application Realm"/>
@@ -243,32 +230,22 @@
                         <mechanism mechanism-name="FORM"/>
                     </mechanism-configuration>
                 </http-authentication-factory>
-                <http-authentication-factory name="management-http-authentication" security-domain="ManagementDomain"
-                                             http-server-mechanism-factory="global">
-                    <mechanism-configuration>
-                        <mechanism mechanism-name="DIGEST">
-                            <mechanism-realm realm-name="ManagementRealm"/>
-                        </mechanism>
-                    </mechanism-configuration>
-                </http-authentication-factory>
                 <provider-http-server-mechanism-factory name="global"/>
             </http>
             <sasl>
-                <sasl-authentication-factory name="application-sasl-authentication" sasl-server-factory="configured"
-                                             security-domain="ApplicationDomain">
+                <sasl-authentication-factory name="management-sasl-authentication" sasl-server-factory="configured" security-domain="ManagementDomain">
+                    <mechanism-configuration>
+                        <mechanism mechanism-name="JBOSS-LOCAL-USER" realm-mapper="local"/>
+                        <mechanism mechanism-name="DIGEST-MD5">
+                            <mechanism-realm realm-name="ManagementRealm"/>
+                        </mechanism>
+                    </mechanism-configuration>
+                </sasl-authentication-factory>
+                <sasl-authentication-factory name="application-sasl-authentication" sasl-server-factory="configured" security-domain="ApplicationDomain">
                     <mechanism-configuration>
                         <mechanism mechanism-name="JBOSS-LOCAL-USER" realm-mapper="local"/>
                         <mechanism mechanism-name="DIGEST-MD5">
                             <mechanism-realm realm-name="ApplicationRealm"/>
-                        </mechanism>
-                    </mechanism-configuration>
-                </sasl-authentication-factory>
-                <sasl-authentication-factory name="management-sasl-authentication" sasl-server-factory="configured"
-                                             security-domain="ManagementDomain">
-                    <mechanism-configuration>
-                        <mechanism mechanism-name="JBOSS-LOCAL-USER" realm-mapper="local"/>
-                        <mechanism mechanism-name="DIGEST-MD5">
-                            <mechanism-realm realm-name="ManagementRealm"/>
                         </mechanism>
                     </mechanism-configuration>
                 </sasl-authentication-factory>
@@ -285,38 +262,69 @@
                 <provider-sasl-server-factory name="global"/>
             </sasl>
         </subsystem>
-        <subsystem xmlns="urn:infinispan:server:core:9.3" default-cache-container="clustered">
+        <subsystem xmlns="urn:infinispan:server:core:9.2" default-cache-container="clustered">
             <cache-container name="clustered" default-cache="default" statistics="true">
                 <transport lock-timeout="60000"/>
                 <global-state/>
-                <modules>
-                    <module name="deployment.sample-interop-entities-1.0-SNAPSHOT.jar"/>
-                </modules>
-                <distributed-cache name="default"/>
-                <distributed-cache name="string-cache">
-                    <encoding>
-                        <key media-type="text/plain"/>
-                        <value media-type="text/plain"/>
-                    </encoding>
-                </distributed-cache>
-                <distributed-cache name="marshalled-pojo-cache">
-                    <encoding>
-                        <key media-type="application/x-jboss-marshalling"/>
-                        <value media-type="application/x-jboss-marshalling"/>
-                    </encoding>
-                </distributed-cache>
-                <distributed-cache name="pojo-cache">
-                    <encoding>
-                        <key media-type="application/x-java-object"/>
-                        <value media-type="application/x-java-object"/>
-                    </encoding>
-                </distributed-cache>
-                <distributed-cache name="indexed">
+                <distributed-cache-configuration name="transactional">
+                    <transaction mode="NON_XA" locking="PESSIMISTIC"/>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="async" mode="ASYNC"/>
+                <replicated-cache-configuration name="replicated"/>
+                <distributed-cache-configuration name="persistent-file-store">
+                    <file-store shared="false" fetch-state="true" passivation="false"/>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="indexed">
                     <indexing index="LOCAL" auto-config="true"/>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="memory-bounded">
+                    <memory>
+                        <binary size="10000000" eviction="MEMORY"/>
+                    </memory>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="persistent-file-store-passivation">
+                    <memory>
+                        <object size="10000"/>
+                    </memory>
+                    <file-store shared="false" fetch-state="true" passivation="true">
+                        <write-behind modification-queue-size="1024" thread-pool-size="1"/>
+                    </file-store>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="persistent-file-store-write-behind">
+                    <file-store shared="false" fetch-state="true" passivation="false">
+                        <write-behind modification-queue-size="1024" thread-pool-size="1"/>
+                    </file-store>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="persistent-rocksdb-store">
+                    <rocksdb-store shared="false" fetch-state="true" passivation="false"/>
+                </distributed-cache-configuration>
+                <distributed-cache-configuration name="persistent-jdbc-string-keyed">
+                    <string-keyed-jdbc-store datasource="java:jboss/datasources/ExampleDS" fetch-state="true" preload="false" purge="false" shared="false" passivation="false">
+                        <string-keyed-table prefix="ISPN">
+                            <id-column name="id" type="VARCHAR"/>
+                            <data-column name="datum" type="BINARY"/>
+                            <timestamp-column name="version" type="BIGINT"/>
+                        </string-keyed-table>
+                        <write-behind modification-queue-size="1024" thread-pool-size="1"/>
+                    </string-keyed-jdbc-store>
+                </distributed-cache-configuration>
+                <distributed-cache name="default"/>
+                <replicated-cache name="repl" configuration="replicated"/>
+                <distributed-cache name="SEGMENTS" owners="1" segments="2048" mode="ASYNC">
+                    <state-transfer await-initial-transfer="true" enabled="true" timeout="2400000" chunk-size="4096"/>
+                    <partition-handling when-split="ALLOW_READ_WRITES" merge-policy="PREFERRED_ALWAYS"/>
+                    <!-- Enable memory based eviction with 4 GB/> -->
+                    <memory>
+                        <binary size="4000" eviction="MEMORY" strategy="REMOVE"/>
+                    </memory>
+                    <rocksdb-store name="segments"  path="rocksdb/data">
+                        <write-behind modification-queue-size="10240" thread-pool-size="5"/>
+                        <expiration path="rocksdb/expired"/>
+                    </rocksdb-store>
                 </distributed-cache>
             </cache-container>
         </subsystem>
-        <subsystem xmlns="urn:infinispan:server:endpoint:9.3">
+        <subsystem xmlns="urn:infinispan:server:endpoint:9.2">
             <hotrod-connector socket-binding="hotrod" cache-container="clustered">
                 <topology-state-transfer lazy-retrieval="false" lock-timeout="1000" replication-timeout="5000"/>
             </hotrod-connector>
@@ -324,7 +332,7 @@
                 <authentication security-realm="ApplicationRealm" auth-method="BASIC"/>
             </rest-connector>
         </subsystem>
-        <subsystem xmlns="urn:infinispan:server:jgroups:9.3">
+        <subsystem xmlns="urn:infinispan:server:jgroups:9.2">
             <channels default="cluster">
                 <channel name="cluster"/>
             </channels>
@@ -380,7 +388,7 @@
                 </stack>
             </stacks>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:io:3.0">
+        <subsystem xmlns="urn:jboss:domain:io:2.0">
             <worker name="default"/>
             <buffer-pool name="default"/>
         </subsystem>
@@ -413,6 +421,7 @@
             <remote-naming/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:remoting:4.0">
+            <endpoint/>
             <http-connector name="http-remoting-connector" connector-ref="default" security-realm="ApplicationRealm"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:security:2.0">
@@ -465,19 +474,16 @@
             <inet-address value="${jboss.bind.address:127.0.0.1}"/>
         </interface>
     </interfaces>
-    <socket-binding-group name="standard-sockets" default-interface="public"
-                          port-offset="${jboss.socket.binding.port-offset:0}">
+    <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
         <socket-binding name="management-http" interface="management" port="${jboss.management.http.port:9990}"/>
         <socket-binding name="management-https" interface="management" port="${jboss.management.https.port:9993}"/>
         <socket-binding name="hotrod" port="11222"/>
         <socket-binding name="hotrod-internal" port="11223"/>
         <socket-binding name="hotrod-multi-tenancy" port="11224"/>
-        <socket-binding name="jgroups-mping" port="0"
-                        multicast-address="${jboss.default.multicast.address:234.99.54.14}" multicast-port="45700"/>
+        <socket-binding name="jgroups-mping" port="0" multicast-address="${jboss.default.multicast.address:234.99.54.14}" multicast-port="45700"/>
         <socket-binding name="jgroups-tcp" port="7600"/>
         <socket-binding name="jgroups-tcp-fd" port="57600"/>
-        <socket-binding name="jgroups-udp" port="55200"
-                        multicast-address="${jboss.default.multicast.address:234.99.54.14}" multicast-port="45688"/>
+        <socket-binding name="jgroups-udp" port="55200" multicast-address="${jboss.default.multicast.address:234.99.54.14}" multicast-port="45688"/>
         <socket-binding name="jgroups-udp-fd" port="54200"/>
         <socket-binding name="memcached" port="11211"/>
         <socket-binding name="rest" port="8080"/>

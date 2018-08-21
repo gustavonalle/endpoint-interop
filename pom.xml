@@ -8,6 +8,10 @@
     <packaging>pom</packaging>
     <name>infinispan-sample-interop-parent</name>
 
+    <properties>
+        <infinispan.version>9.3.1.Final</infinispan.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
